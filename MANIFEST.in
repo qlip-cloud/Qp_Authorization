@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include qp_authorization *.css
+recursive-include qp_authorization *.csv
+recursive-include qp_authorization *.html
+recursive-include qp_authorization *.ico
+recursive-include qp_authorization *.js
+recursive-include qp_authorization *.json
+recursive-include qp_authorization *.md
+recursive-include qp_authorization *.png
+recursive-include qp_authorization *.py
+recursive-include qp_authorization *.svg
+recursive-include qp_authorization *.txt
+recursive-exclude qp_authorization *.pyc
