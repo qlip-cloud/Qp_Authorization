@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "creation": "2023-09-19 19:30:26.499718",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "token_type",
+  "scope",
+  "expires_in",
+  "ext_expires_in",
+  "expires_on",
+  "not_before",
+  "resource",
+  "access_token",
+  "refresh_token",
+  "code",
+  "expire_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "token_type",
+   "fieldtype": "Data",
+   "label": "token_type"
+  },
+  {
+   "fieldname": "scope",
+   "fieldtype": "Data",
+   "label": "scope"
+  },
+  {
+   "fieldname": "expires_in",
+   "fieldtype": "Data",
+   "label": "expires_in"
+  },
+  {
+   "fieldname": "ext_expires_in",
+   "fieldtype": "Data",
+   "label": "ext_expires_in"
+  },
+  {
+   "fieldname": "expires_on",
+   "fieldtype": "Data",
+   "label": "expires_on"
+  },
+  {
+   "fieldname": "not_before",
+   "fieldtype": "Data",
+   "label": "not_before"
+  },
+  {
+   "fieldname": "resource",
+   "fieldtype": "Data",
+   "label": "resource"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Long Text",
+   "label": "access_token"
+  },
+  {
+   "fieldname": "refresh_token",
+   "fieldtype": "Long Text",
+   "label": "refresh_token"
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Long Text",
+   "label": "code"
+  },
+  {
+   "fieldname": "expire_date",
+   "fieldtype": "Datetime",
+   "label": "expire_date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-09-19 19:30:26.499718",
+ "modified_by": "Administrator",
+ "module": "Qp Authorization",
+ "name": "qp_auth_session",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
