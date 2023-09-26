@@ -99,7 +99,6 @@ def get_refresh_token(session):
 
     return response_json["access_token"]
 
-@frappe.whitelist()
 def get_token():
 
     session = frappe.get_last_doc('qp_auth_session')
