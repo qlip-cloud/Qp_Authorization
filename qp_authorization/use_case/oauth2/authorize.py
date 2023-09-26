@@ -97,13 +97,15 @@ def get_refresh_token(session):
 
 @frappe.whitelist()
 def get_token():
-
-    session = frappe.get_last_doc('qp_auth_session')
     
-    if session:
+    if frappe.get_list('qp_auth_session'):
+
+        session = frappe.get_last_doc('qp_auth_session')
         
         if session.expire_date > datetime.now():
 
             return session.access_token
 
         return get_refresh_token(session)
+        
+    request_code()
