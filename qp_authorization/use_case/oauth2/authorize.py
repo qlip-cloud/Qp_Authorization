@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 @frappe.whitelist()
 def request_code():
 
+    frappe.cache().set("access_token", "empty")
+
     credentials = frappe.db.get_list('qp_auth_credentials', fields = ["auth_url", "client_id", "callback_url"])
 
     url = credentials[0].auth_url
@@ -63,6 +65,8 @@ def create_session(response_json):
 
     frappe.db.commit()
 
+    frappe.cache().set("access_token", "full")
+
 def get_refresh_token(session):
 
     credentials = frappe.db.get_list('qp_auth_credentials', fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
@@ -97,7 +101,32 @@ def get_refresh_token(session):
 
 @frappe.whitelist()
 def get_token():
-    
+
+    session = frappe.get_last_doc('qp_auth_session')
+        
+    if session.expire_date > datetime.now():
+
+        return session.access_token
+
+    return get_refresh_token(session)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def callback():
+
     if frappe.get_list('qp_auth_session'):
 
         session = frappe.get_last_doc('qp_auth_session')
@@ -107,5 +136,15 @@ def get_token():
             return session.access_token
 
         return get_refresh_token(session)
+    
+    status = frappe.cache().get("access_token")
+    
+    if status == "empty":
+
+        return False
+    
+    if not status:
         
-    request_code()
+        request_code()
+
+        return False
