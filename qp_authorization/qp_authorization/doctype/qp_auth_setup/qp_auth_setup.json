@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "creation": "2024-03-11 15:01:52.627411",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enviroment",
+  "scenviroment",
+  "enviroment_title",
+  "ssenviroment",
+  "autenticacion",
+  "acautonticacion",
+  "autenticacion_title"
+ ],
+ "fields": [
+  {
+   "fieldname": "enviroment",
+   "fieldtype": "Link",
+   "label": "Enviroment",
+   "options": "qp_auth_Enviroment"
+  },
+  {
+   "fieldname": "scenviroment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "enviroment.title",
+   "fieldname": "enviroment_title",
+   "fieldtype": "Read Only",
+   "label": "Enviroment title"
+  },
+  {
+   "fieldname": "ssenviroment",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "autenticacion",
+   "fieldtype": "Link",
+   "label": "Autenticacion",
+   "options": "qp_auth_credentials"
+  },
+  {
+   "fieldname": "acautonticacion",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "autenticacion.title",
+   "fieldname": "autenticacion_title",
+   "fieldtype": "Read Only",
+   "label": "Autenticacion title"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-18 17:18:25.224606",
+ "modified_by": "Administrator",
+ "module": "Qp Authorization",
+ "name": "qp_auth_Setup",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
