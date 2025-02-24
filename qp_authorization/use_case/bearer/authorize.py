@@ -47,8 +47,9 @@ def get_doc_session():
 def get_cache_session():
 
     cache = frappe.cache()
+    current_site = frappe.local.site
 
-    session_cache = cache.get("session")
+    session_cache = cache.get(f"session-{current_site}")
 
     if session_cache:
 
@@ -80,8 +81,10 @@ def search_token(enviroment = None):
     response, status_code = send_request_base(url, payload, headers, method = endpoint.method)
 
     assert_authentication_ok(status_code)
-
-    return response.get("Token")
+    
+    response_lower = {k.lower(): v for k, v in response.items()}
+    
+    return response_lower.get("token")
 
 def get_headers(token = None):
 
@@ -90,7 +93,9 @@ def get_headers(token = None):
     }
 
     if token:
-
+        
+        token = "Bearer " + token
+        
         headers.setdefault("Authorization", token)
 
     return headers
@@ -111,6 +116,21 @@ def send_request(endpoint_code, id = None, payload = ""):
 
     return response
 
+def send_request_with_param(endpoint_code, id = None, payload = ""):
+    
+    token = get_token()
+
+    enviroment = get_cache_enviroment()
+
+    endpoint = get_endpoint(endpoint_code)
+
+    url = enviroment.get_url(endpoint.url, id)
+
+    headers = get_headers(token)
+
+    response, status =  send_request_base(url, payload, headers, method = endpoint.method)
+
+    return response
 
 def assert_authentication_ok(status_code):
 
@@ -144,8 +164,10 @@ def create_session():
 def save_cache_session(session):
 
     cache = frappe.cache()
-
-    cache.set("session", session.as_json())
+    
+    current_site = frappe.local.site
+    
+    cache.set(f"session-{current_site}", session.as_json())
 
 def save_session(token, expire_date):
 

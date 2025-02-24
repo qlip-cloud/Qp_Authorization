@@ -23,18 +23,20 @@ def  get_enviroment():
 def get_cache_enviroment():
 
     cache = frappe.cache()
+    
+    current_site = frappe.local.site
 
-    enviroment_url = cache.get("enviroment")
+    enviroment_url = cache.get(f"enviroment-{current_site}")
 
     if not enviroment_url:
 
         enviroment = get_enviroment()
 
-        cache.set("enviroment", enviroment.as_json())
+        cache.set(f"enviroment-{current_site}", enviroment.as_json())
 
         return enviroment
-    
-    enviroment_json = json.loads(cache.get("enviroment"))
+        
+    enviroment_json = json.loads(cache.get(f"enviroment-{current_site}"))
 
     enviroment_json.setdefault("doctype", "qp_auth_Enviroment")
 
