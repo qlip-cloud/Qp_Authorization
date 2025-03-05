@@ -100,7 +100,7 @@ def get_headers(token = None):
 
     return headers
 
-def send_request(endpoint_code, id = None, payload = ""):
+def send_request(endpoint_code, id = None, payload = "", param = None):
     
     token = get_token()
 
@@ -109,7 +109,9 @@ def send_request(endpoint_code, id = None, payload = ""):
     endpoint = get_endpoint(endpoint_code)
 
     url = enviroment.get_url(endpoint.url, id)
-
+    
+    url = f"{url}/{param}" if param else url
+    
     headers = get_headers(token)
 
     response, status =  send_request_base(url, payload, headers, method = endpoint.method)
