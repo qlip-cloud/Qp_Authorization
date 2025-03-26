@@ -10,6 +10,9 @@ def handler(url, payload, headers, method = "POST"):
             
         response = requests.request(method, url, headers=headers, data=data)
         
+        return json.loads(response.text), response.status_code
+        
+        
     except requests.exceptions.Timeout:
 
         return {
@@ -24,7 +27,12 @@ def handler(url, payload, headers, method = "POST"):
             "errorInterno": str(e)
         }, 500
     
-    return json.loads(response.text), response.status_code
+    except Exception as e:
 
+        return {
+            "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
+            "errorInterno": str(e)
+        }, 500
+    
 
 
