@@ -9,7 +9,7 @@ def handler(url, payload, headers, method = "POST"):
     try:
             
         response = requests.request(method, url, headers=headers, data=data)
-        message = response.text + "\n" + data
+        message = response.text + "\n" + data + "\n" + url
         
         frappe.log_error(message=message, title="assertResponse")
     
