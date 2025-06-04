@@ -7,16 +7,18 @@ def handler(url, payload, headers, method = "POST"):
     data=json.dumps(payload)
 
     try:
-            
+        
+        frappe.log_error(message=data, title= f"inicio la Peticion {url} method: {method}")
+
         response = requests.request(method, url, headers=headers, data=data)
 
         frappe.log_error(message=json.loads(response.text), title= f"Peticion {url} method: {method}")
 
-        
         return json.loads(response.text), response.status_code
         
-        
     except requests.exceptions.Timeout:
+        
+        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
 
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
@@ -24,6 +26,8 @@ def handler(url, payload, headers, method = "POST"):
         }, 500
 
     except requests.exceptions.RequestException as e:
+        
+        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
 
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
@@ -31,11 +35,10 @@ def handler(url, payload, headers, method = "POST"):
         }, 500
     
     except Exception as e:
+        
+        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
 
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
             "errorInterno": str(e)
         }, 500
-    
-
-
