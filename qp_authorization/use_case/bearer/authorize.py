@@ -145,6 +145,7 @@ def assert_authentication_ok(status_code):
         raise AuthenticationFail()
     
 class AuthenticationFail(Exception):
+    
     def __init__(self, message="Error en autenticacion"):
 
         self.message = message

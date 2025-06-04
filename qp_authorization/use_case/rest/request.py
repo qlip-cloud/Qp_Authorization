@@ -9,7 +9,10 @@ def handler(url, payload, headers, method = "POST"):
     try:
             
         response = requests.request(method, url, headers=headers, data=data)
-    
+
+        frappe.log_error(message=json.loads(response.text), title= f"Peticion {url} method: {method}")
+
+        
         return json.loads(response.text), response.status_code
         
         
