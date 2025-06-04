@@ -16,7 +16,7 @@ def handler(url, payload, headers, method = "POST"):
 
         return json.loads(response.text), response.status_code
         
-    except requests.exceptions.Timeout:
+    except requests.exceptions.Timeout as e:
         
         frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
 
