@@ -102,6 +102,12 @@ def get_headers(token = None):
 
 def send_request(endpoint_code, id = None, payload = "", param = None):
     
+    response, status = send_request_status(endpoint_code, id, payload, param)
+
+    return response
+
+def send_request_status(endpoint_code, id = None, payload = "", param = None):
+    
     token = get_token()
 
     enviroment = get_cache_enviroment()
@@ -116,9 +122,15 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     response, status =  send_request_base(url, payload, headers, method = endpoint.method)
 
-    return response
+    return response, status
 
 def send_request_with_param(endpoint_code, id = None, payload = ""):
+    
+    response, status = send_request_status_with_param(endpoint_code, id = None, payload = "")
+    
+    return response
+    
+def send_request_status_with_param(endpoint_code, id = None, payload = ""):
     
     token = get_token()
 
@@ -132,7 +144,7 @@ def send_request_with_param(endpoint_code, id = None, payload = ""):
 
     response, status =  send_request_base(url, payload, headers, method = endpoint.method)
 
-    return response
+    return response, status
 
 def assert_authentication_ok(status_code):
 
