@@ -48,6 +48,8 @@ def get_access_token():
     response_json = json.loads(response.text)
 
     if "error" in response_json:
+        
+        frappe.log_error(response_json, "Error en peticion de BC")
 
         request_code()
 
@@ -92,7 +94,9 @@ def get_refresh_token(session):
     response_json = json.loads(response.text)
 
     if "error" in response_json:
-
+        
+        frappe.log_error(response_json, "Error en peticion de BC")
+        
         request_code()
 
     create_session(response_json)
