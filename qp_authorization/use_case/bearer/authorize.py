@@ -47,6 +47,7 @@ def get_doc_session():
 def get_cache_session():
 
     cache = frappe.cache()
+    
     current_site = frappe.local.site
 
     session_cache = cache.get(f"session-{current_site}")
@@ -73,9 +74,12 @@ def search_token(enviroment = None):
 
     headers = get_headers()
 
+    username_key = enviroment.username_key if enviroment.username_key else "Username"
+    password_key = enviroment.password_key if enviroment.password_key else "Password"
+    
     payload = {
-        "Username": enviroment.user,
-        "Password": enviroment.password
+        username_key: enviroment.user,
+        password_key: enviroment.password
     }
 
     response, status_code = send_request_base(url, payload, headers, method = endpoint.method)
@@ -106,7 +110,7 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     return response
 
-def send_request_status(endpoint_code, id = None, payload = "", param = None):
+def send_request_status(endpoint_code, id = None, payload = "", param = None, is_query_param = False):
     
     token = get_token()
 
@@ -116,7 +120,9 @@ def send_request_status(endpoint_code, id = None, payload = "", param = None):
 
     url = enviroment.get_url(endpoint.url, id)
     
-    url = f"{url}/{param}" if param else url
+    type_param = "?" if is_query_param else "/"
+    
+    url += f"{type_param}{param}"    
     
     headers = get_headers(token)
 
