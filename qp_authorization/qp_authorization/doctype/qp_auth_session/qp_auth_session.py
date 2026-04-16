@@ -5,15 +5,16 @@
 from frappe.model.document import Document
 from datetime import datetime
 from frappe.utils import getdate
+from frappe.utils import get_datetime, now_datetime
 
 class qp_auth_session(Document):
 	
 	def is_valid(self):
+     
+		if not self.expire_date:
+      
+			return False
 		
-		format_string = "%Y-%m-%d %H:%M:%S"
+		self.expire_date = get_datetime(self.expire_date)
 
-		if not isinstance(self.expire_date, datetime):
-		
-			self.expire_date = datetime.strptime(self.expire_date, format_string)
-
-		return self.expire_date >= datetime.now()
+		return self.expire_date >= now_datetime()
