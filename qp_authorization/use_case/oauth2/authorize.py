@@ -9,7 +9,7 @@ def request_code():
 
     frappe.cache().set("access_token", "empty")
 
-    credentials = frappe.db.get_list('qp_auth_credentials', fields = ["auth_url", "client_id", "callback_url"])
+    credentials = frappe.db.get_list('qp_auth_credentials', filters = {"grant_type":  "Authorization Code"}, fields = ["auth_url", "client_id", "callback_url"])
 
     url = credentials[0].auth_url
     
@@ -26,7 +26,7 @@ def get_access_token():
 
     query_params = frappe.request.args
 
-    credentials = frappe.db.get_list('qp_auth_credentials', fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
+    credentials = frappe.db.get_list('qp_auth_credentials', filters = {"grant_type":  "Authorization Code"}, fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
 
     url = credentials[0].access_token_url
 
@@ -71,7 +71,7 @@ def create_session(response_json):
 
 def get_refresh_token(session):
 
-    credentials = frappe.db.get_list('qp_auth_credentials', fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
+    credentials = frappe.db.get_list('qp_auth_credentials',filters = {"grant_type":  "Authorization Code"}, fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
 
     url = credentials[0].access_token_url
 
@@ -112,21 +112,6 @@ def get_token():
         return session.access_token
 
     return get_refresh_token(session)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def callback():
 

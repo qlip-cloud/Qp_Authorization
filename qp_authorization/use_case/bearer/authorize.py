@@ -74,9 +74,9 @@ def search_token(enviroment = None):
 
     headers = get_headers()
 
-    username_key = enviroment.username_key if enviroment.username_key else "Username"
-    password_key = enviroment.password_key if enviroment.password_key else "Password"
-    
+    username_key = enviroment.username_key if hasattr(enviroment, "username_key") and enviroment.username_key else "Username"
+    password_key = enviroment.password_key if hasattr(enviroment, "password_key") and enviroment.password_key else "Password"
+
     payload = {
         username_key: enviroment.user,
         password_key: enviroment.password
