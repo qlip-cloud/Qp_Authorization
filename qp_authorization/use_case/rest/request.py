@@ -4,12 +4,12 @@ import pickle
 import frappe
 def handler(url, payload, headers, method = "POST"):
 
-    data=json.dumps(payload)
+    data= json.dumps(payload)
 
     try:
         
         response = requests.request(method, url, headers=headers, data=data)
-
+        frappe.log_error(message=str(response.text), title= f"Error al procesar peticion {url}")
         return json.loads(response.text), response.status_code
         
     except requests.exceptions.Timeout as e:
