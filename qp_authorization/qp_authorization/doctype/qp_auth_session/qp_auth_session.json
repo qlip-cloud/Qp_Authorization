@@ -15,7 +15,8 @@
   "access_token",
   "refresh_token",
   "code",
-  "expire_date"
+  "expire_date",
+  "enviroment"
  ],
  "fields": [
   {
@@ -72,11 +73,16 @@
    "fieldname": "expire_date",
    "fieldtype": "Datetime",
    "label": "expire_date"
+  },
+  {
+   "fieldname": "enviroment",
+   "fieldtype": "Data",
+   "label": "enviroment"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-18 17:18:40.617837",
+ "modified": "2026-04-16 08:43:03.985234",
  "modified_by": "Administrator",
  "module": "Qp Authorization",
  "name": "qp_auth_session",

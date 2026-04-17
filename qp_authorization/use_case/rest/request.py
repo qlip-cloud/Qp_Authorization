@@ -9,6 +9,7 @@ def handler(url, payload, headers, method = "POST"):
     try:
         
         response = requests.request(method, url, headers=headers, data=data)
+
         mensaje = f"""
             response: {response}
             response.text: {response.text}
