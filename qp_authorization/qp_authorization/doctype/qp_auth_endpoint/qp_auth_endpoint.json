@@ -9,7 +9,8 @@
   "code",
   "title",
   "url",
-  "method"
+  "method",
+  "setup"
  ],
  "fields": [
   {
@@ -33,11 +34,17 @@
    "fieldtype": "Select",
    "label": "method",
    "options": "GET\nPOST\nPUT\nDELETE"
+  },
+  {
+   "fieldname": "setup",
+   "fieldtype": "Link",
+   "label": "setup",
+   "options": "qp_auth_Setup"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-18 17:15:52.299316",
+ "modified": "2026-04-17 03:29:49.937950",
  "modified_by": "Administrator",
  "module": "Qp Authorization",
  "name": "qp_auth_Endpoint",

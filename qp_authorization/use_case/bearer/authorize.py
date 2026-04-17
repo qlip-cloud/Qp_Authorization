@@ -1,56 +1,56 @@
 import frappe
 from datetime import datetime
-from qp_authorization.service.utils import get_endpoint, get_cache_enviroment
 from qp_authorization.constant.endpoint import AUTH
 from qp_authorization.use_case.rest.request import handler as send_request_base
 import jwt
 import json
+from qp_authorization.service.utils import get_endpoint, get_cache_enviroment
 
-def get_token():
+def get_token(enviroment, setup_code):
     
-    session = get_session()
+    session = get_session(enviroment.name)
     
     if session:
 
         return session.access_token
+    
+    endpoint = get_endpoint(AUTH, setup_code)
 
-    session = create_session()
+    session = create_session(enviroment, endpoint)
     
     return session.access_token
 
-def get_session():
+def get_session(enviroment_code):
     
-    session_cache = get_cache_session()  
+    session_cache = get_cache_session(enviroment_code)  
 
     if session_cache:
 
         return session_cache
     
-    session_doc = get_doc_session()
+    return get_doc_session(enviroment_code)
     
-    if session_doc:
+def get_doc_session(enviroment_code):
+    
+    filters = {"enviroment": enviroment_code}
+    
+    if frappe.db.count('qp_auth_session', filters=filters):
 
-        return session_doc
-
-def get_doc_session():
-
-    if frappe.db.count('qp_auth_session'):
-
-        session = frappe.get_last_doc('qp_auth_session')
+        session = frappe.get_last_doc('qp_auth_session', filters=filters)
 
         if session and session.is_valid():
 
-            save_cache_session(session)
+            save_cache_session(session, enviroment_code)
 
             return session
     
-def get_cache_session():
+def get_cache_session(enviroment_code):
 
     cache = frappe.cache()
     
     current_site = frappe.local.site
 
-    session_cache = cache.get(f"session-{current_site}")
+    session_cache = cache.get(f"session-{current_site}-{enviroment_code}")
 
     if session_cache:
 
@@ -62,14 +62,8 @@ def get_cache_session():
 
             return session
 
-def search_token(enviroment = None):
+def search_token(enviroment, endpoint):
     
-    if not enviroment:
-        
-        enviroment = get_cache_enviroment()
-
-    endpoint = get_endpoint(AUTH)
-
     url = enviroment.get_url(endpoint.url)
 
     headers = get_headers()
@@ -112,11 +106,9 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
 def send_request_status(endpoint_code, id = None, payload = "", param = None, is_query_param = False):
     
-    token = get_token()
-
-    enviroment = get_cache_enviroment()
-
-    endpoint = get_endpoint(endpoint_code)
+    enviroment, endpoint, setup = get_enviroment(endpoint_code)
+    
+    token = get_token(enviroment, setup.name)
 
     url = enviroment.get_url(endpoint.url, id)
     
@@ -138,11 +130,9 @@ def send_request_with_param(endpoint_code, id = None, payload = ""):
     
 def send_request_status_with_param(endpoint_code, id = None, payload = ""):
     
-    token = get_token()
-
-    enviroment = get_cache_enviroment()
-
-    endpoint = get_endpoint(endpoint_code)
+    enviroment, endpoint, setup = get_enviroment(endpoint_code)
+    
+    token = get_token(enviroment, setup.name)
 
     url = enviroment.get_url(endpoint.url, id)
 
@@ -170,32 +160,33 @@ class AuthenticationFail(Exception):
 
         super().__init__(self.message)
 
-def create_session():
+def create_session(enviroment, endpoint):
 
-    token = search_token()
+    token = search_token(enviroment, endpoint)
 
     expire_date = get_expire_date(token)
 
-    session = save_session(token, expire_date)
+    session = save_session(token, expire_date, enviroment.name)
 
-    save_cache_session(session)
+    save_cache_session(session, enviroment.name)
 
     return session
 
-def save_cache_session(session):
+def save_cache_session(session, enviroment_code):
 
     cache = frappe.cache()
     
     current_site = frappe.local.site
     
-    cache.set(f"session-{current_site}", session.as_json())
+    cache.set(f"session-{current_site}-{enviroment_code}", session.as_json())
 
-def save_session(token, expire_date):
+def save_session(token, expire_date, enviroment_code):
 
     session_json = {
         "token_type": "bearer",
         "access_token": token,
-        "expire_date": expire_date
+        "expire_date": expire_date,
+        "enviroment": enviroment_code
     }
 
     session = frappe.get_doc(doctype = "qp_auth_session", **session_json)
@@ -213,3 +204,19 @@ def get_expire_date(token):
     expiration_time = decoded_token.get('exp')
 
     return datetime.fromtimestamp(expiration_time)
+
+def get_enviroment(endpoint_code, setup_list_code = None):
+
+    endpoint = frappe.get_doc("qp_auth_Endpoint", endpoint_code)
+    
+    if not setup_list_code:
+        
+        setup_list_code = endpoint.setup
+        
+    setup = frappe.get_doc("qp_auth_Setup", setup_list_code)
+    
+    enviroment_code = setup.enviroment
+        
+    enviroment = frappe.get_doc("qp_auth_Enviroment", enviroment_code)
+
+    return enviroment, endpoint, setup
