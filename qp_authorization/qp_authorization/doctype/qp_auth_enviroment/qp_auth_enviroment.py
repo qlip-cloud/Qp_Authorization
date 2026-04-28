@@ -8,8 +8,8 @@ from qp_authorization.use_case.bearer.authorize import search_token
 class qp_auth_Enviroment(Document):
 	
 	def validate(self):
-
-		search_token(self)
+		pass
+		#search_token(self)
 
 	def get_url(self, url, id = None):
 
