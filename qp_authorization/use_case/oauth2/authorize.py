@@ -71,7 +71,7 @@ def create_session(response_json):
 
 def get_refresh_token(session):
 
-    credentials = frappe.db.get_list('qp_auth_credentials',filters = {"grant_type":  "Authorization Code"}, fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
+    credentials = frappe.db.get_list('qp_auth_credentials', filters = {"grant_type":  "Authorization Code"}, fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
 
     url = credentials[0].access_token_url
 
@@ -103,9 +103,9 @@ def get_refresh_token(session):
 
     return response_json["access_token"]
 
-def get_token():
+def get_token(enviroment):
 
-    session = frappe.get_last_doc('qp_auth_session')
+    session = frappe.get_last_doc('qp_auth_session', filters = {"enviroment": enviroment})
         
     if session.expire_date > datetime.now():
 

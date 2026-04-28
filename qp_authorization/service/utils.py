@@ -6,9 +6,14 @@ def get_setup():
 
     return frappe.get_doc("qp_auth_Setup")
 
-def get_endpoint(code): 
+def get_endpoint(endpoint_code, setup_code): 
 
-    return frappe.get_doc("qp_auth_Endpoint", code)
+    filters = {
+        "setup": setup_code, 
+        "code": endpoint_code
+    }
+    
+    return frappe.get_last_doc("qp_auth_Endpoint", filters = filters)
 
 def  get_enviroment():
 

@@ -1,6 +1,7 @@
 {
  "actions": [],
- "creation": "2024-03-11 15:01:52.627411",
+ "autoname": "field:code",
+ "creation": "2026-04-16 13:14:47.350060",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -11,7 +12,8 @@
   "ssenviroment",
   "autenticacion",
   "acautonticacion",
-  "autenticacion_title"
+  "autenticacion_title",
+  "code"
  ],
  "fields": [
   {
@@ -49,12 +51,17 @@
    "fieldname": "autenticacion_title",
    "fieldtype": "Read Only",
    "label": "Autenticacion title"
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "code",
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
- "issingle": 1,
  "links": [],
- "modified": "2024-03-18 17:18:25.224606",
+ "modified": "2026-04-16 13:14:47.350060",
  "modified_by": "Administrator",
  "module": "Qp Authorization",
  "name": "qp_auth_Setup",
