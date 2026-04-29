@@ -20,8 +20,9 @@ def handler(url, payload, headers, method = "POST"):
         # Si quieres ver el body de forma legible (si es bytes, hay que decodificar)
         if response.request.body:
             print(f"Body decodificado: {response.request.body.decode('utf-8')}")
-            
+        tipo_payload = type(payload)
         mensaje = f"""
+            ¿El payload es diccionario?: {isinstance(payload, dict)}
             data: {data} \n
             method: {method} \n
             url: {url} \n
