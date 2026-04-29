@@ -112,7 +112,11 @@ def send_request_status(endpoint_code, id = None, payload = "", param = None, is
 
     url = enviroment.get_url(endpoint.url, id)
     
-    type_param = "?" if is_query_param else "/"
+    type_param = ""
+    
+    if param:
+    
+        type_param = "?" if is_query_param else "/"
     
     url += f"{type_param}{param}"    
     
