@@ -10,25 +10,7 @@ def handler(url, payload, headers, method = "POST"):
         
         response = requests.request(method, url, headers=headers, data = data)
         
-        mensaje = f"""
-            ¿El payload es diccionario?: {isinstance(payload, dict)}
-            data: {data} \n
-            method: {method} \n
-            url: {url} \n
-            headers: {headers} \n
-            response: {response} \n
-            response.text: {response.text} \n 
-            response.status_code: {response.status_code} \n
-            response.reason: {response.reason} \n 
-            response.headers: {response.headers} \n
-            --- DETALLES DE LA PETICIÓN ENVIADA --- \n 
-            Método: {response.request.method} \n 
-            URL: {response.request.url} \n 
-            Headers enviados: {response.request.headers} \n 
-            Body enviado (crudo): {response.request.body} \n 
-            Body decodificado: {response.request.body} \n 
-        """
-        frappe.log_error(message=mensaje, title= f"Error al procesar peticion {url}")
+        set_logg_error(data, method, url, headers, response)
         
         return json.loads(response.text), response.status_code
         
@@ -66,3 +48,25 @@ def handler(url, payload, headers, method = "POST"):
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
             "errorInterno": str(e)
         }, 500
+        
+        
+def set_logg_error(data, method, url, headers, response):
+    
+    mensaje = f"""
+            data: {data} \n
+            method: {method} \n
+            url: {url} \n
+            headers: {headers} \n
+            response: {response} \n
+            response.text: {response.text} \n 
+            response.status_code: {response.status_code} \n
+            response.reason: {response.reason} \n 
+            response.headers: {response.headers} \n
+            --- DETALLES DE LA PETICIÓN ENVIADA --- \n 
+            Método: {response.request.method} \n 
+            URL: {response.request.url} \n 
+            Headers enviados: {response.request.headers} \n 
+            Body enviado (crudo): {response.request.body} \n 
+            Body decodificado: {response.request.body} \n 
+        """
+    frappe.log_error(message=mensaje, title= f"Error al procesar peticion {url}")
