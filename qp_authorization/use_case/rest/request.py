@@ -12,6 +12,9 @@ def handler(url, payload, headers, method = "POST"):
 
         mensaje = f"""
             data: {data} \n
+            method: {method} \n
+            url: {url} \n
+            headers: {headers} \n
             response: {response} \n
             response.text: {response.text} \n 
             response.status_code: {response.status_code} \n
