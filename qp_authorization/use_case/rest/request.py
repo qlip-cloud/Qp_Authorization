@@ -8,7 +8,7 @@ def handler(url, payload, headers, method = "POST"):
 
     try:
         
-        response = requests.request(method, url, headers=headers, data=data)
+        response = requests.request(method, url, headers=headers, json = payload)
 
         mensaje = f"""
             data: {data} \n
