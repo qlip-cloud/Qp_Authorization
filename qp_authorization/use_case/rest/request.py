@@ -11,11 +11,12 @@ def handler(url, payload, headers, method = "POST"):
         response = requests.request(method, url, headers=headers, data=data)
 
         mensaje = f"""
-            response: {response}
-            response.text: {response.text}
-            response.status_code: {response.status_code}
-            response.reason: {response.reason}
-            response.headers: {response.headers}
+            data: {data} \n
+            response: {response} \n
+            response.text: {response.text} \n 
+            response.status_code: {response.status_code} \n
+            response.reason: {response.reason} \n 
+            response.headers: {response.headers} \n
         """
         frappe.log_error(message=mensaje, title= f"Error al procesar peticion {url}")
         
