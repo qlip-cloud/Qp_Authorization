@@ -8,7 +8,7 @@ def handler(url, payload, headers, method = "POST"):
 
     try:
         
-        response = requests.request(method, url, headers=headers, json = payload)
+        response = requests.request(method, url, headers=headers, data = data)
         print("--- DETALLES DE LA PETICIÓN ENVIADA ---")
         print(f"Método: {response.request.method}")
         print(f"URL: {response.request.url}")
