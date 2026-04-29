@@ -9,18 +9,7 @@ def handler(url, payload, headers, method = "POST"):
     try:
         
         response = requests.request(method, url, headers=headers, data = data)
-        print("--- DETALLES DE LA PETICIÓN ENVIADA ---")
-        print(f"Método: {response.request.method}")
-        print(f"URL: {response.request.url}")
-        print(f"Headers enviados: {response.request.headers}")
-
-        # El body es lo más importante en este caso
-        print(f"Body enviado (crudo): {response.request.body}")
-
-        # Si quieres ver el body de forma legible (si es bytes, hay que decodificar)
-        if response.request.body:
-            print(f"Body decodificado: {response.request.body.decode('utf-8')}")
-        tipo_payload = type(payload)
+        
         mensaje = f"""
             ¿El payload es diccionario?: {isinstance(payload, dict)}
             data: {data} \n
@@ -37,7 +26,7 @@ def handler(url, payload, headers, method = "POST"):
             URL: {response.request.url} \n 
             Headers enviados: {response.request.headers} \n 
             Body enviado (crudo): {response.request.body} \n 
-            Body decodificado: {response.request.body.decode('utf-8') if response.request.body else ""} \n 
+            Body decodificado: {response.request.body} \n 
         """
         frappe.log_error(message=mensaje, title= f"Error al procesar peticion {url}")
         
