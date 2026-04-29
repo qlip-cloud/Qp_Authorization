@@ -9,7 +9,18 @@ def handler(url, payload, headers, method = "POST"):
     try:
         
         response = requests.request(method, url, headers=headers, json = payload)
+        print("--- DETALLES DE LA PETICIÓN ENVIADA ---")
+        print(f"Método: {response.request.method}")
+        print(f"URL: {response.request.url}")
+        print(f"Headers enviados: {response.request.headers}")
 
+        # El body es lo más importante en este caso
+        print(f"Body enviado (crudo): {response.request.body}")
+
+        # Si quieres ver el body de forma legible (si es bytes, hay que decodificar)
+        if response.request.body:
+            print(f"Body decodificado: {response.request.body.decode('utf-8')}")
+            
         mensaje = f"""
             data: {data} \n
             method: {method} \n
@@ -20,6 +31,12 @@ def handler(url, payload, headers, method = "POST"):
             response.status_code: {response.status_code} \n
             response.reason: {response.reason} \n 
             response.headers: {response.headers} \n
+            --- DETALLES DE LA PETICIÓN ENVIADA --- \n 
+            Método: {response.request.method} \n 
+            URL: {response.request.url} \n 
+            Headers enviados: {response.request.headers} \n 
+            Body enviado (crudo): {response.request.body} \n 
+            Body decodificado: {response.request.body.decode('utf-8') if response.request.body else ""} \n 
         """
         frappe.log_error(message=mensaje, title= f"Error al procesar peticion {url}")
         
