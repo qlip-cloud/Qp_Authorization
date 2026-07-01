@@ -4,7 +4,7 @@ from qp_authorization.constant.endpoint import AUTH
 from qp_authorization.use_case.rest.request import handler as send_request_base
 import jwt
 import json
-from qp_authorization.service.utils import get_endpoint, get_cache_enviroment
+from qp_authorization.service.utils import get_endpoint
 
 def get_token(enviroment, setup_code):
     
