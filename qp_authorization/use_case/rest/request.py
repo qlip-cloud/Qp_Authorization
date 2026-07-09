@@ -16,7 +16,8 @@ def handler(url, payload, headers, method = "POST"):
         
     except requests.exceptions.Timeout as e:
         
-        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
+        title = ("Error al procesar peticion " + url)[:140]
+        frappe.log_error(message=str(e), title=title)
 
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
@@ -25,7 +26,8 @@ def handler(url, payload, headers, method = "POST"):
 
     except requests.exceptions.RequestException as e:
         
-        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
+        title = ("Error al procesar peticion " + url)[:140]
+        frappe.log_error(message=str(e), title=title)
 
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
@@ -34,7 +36,8 @@ def handler(url, payload, headers, method = "POST"):
         
     except json.JSONDecodeError as e:
         
-        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
+        title = ("Error al procesar peticion " + url)[:140]
+        frappe.log_error(message=str(e), title=title)
 
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
@@ -42,7 +45,8 @@ def handler(url, payload, headers, method = "POST"):
         }, 500
     except Exception as e:
         
-        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
+        title = ("Error al procesar peticion " + url)[:140]
+        frappe.log_error(message=str(e), title=title)
 
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
@@ -69,4 +73,5 @@ def set_logg_error(data, method, url, headers, response):
             Body enviado (crudo): {response.request.body} \n 
             Body decodificado: {response.request.body} \n 
         """
-    frappe.log_error(message=mensaje, title= f"Error al procesar peticion {url}")
+    title = ("Error al procesar peticion " + url)[:140]
+    frappe.log_error(message=mensaje, title=title)
