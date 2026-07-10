@@ -22,7 +22,7 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     return response
 
-def send_request_status(endpoint_code, id = None, payload = "", param = None, is_query_param = False):
+def send_request_status(endpoint_code, id = None, payload = "", param = '', is_query_param = False):
     
     enviroment, endpoint, setup = get_enviroment(endpoint_code)
 
