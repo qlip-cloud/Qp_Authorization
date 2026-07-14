@@ -21,13 +21,7 @@ def get_token(enviroment, setup_code):
     return session.access_token
 
 def get_session(enviroment_code):
-    
-    session_cache = get_cache_session(enviroment_code)  
-
-    if session_cache:
-
-        return session_cache
-    
+        
     return get_doc_session(enviroment_code)
     
 def get_doc_session(enviroment_code):
