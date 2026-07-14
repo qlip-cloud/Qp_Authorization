@@ -104,7 +104,7 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     return response
 
-def send_request_status(endpoint_code, id = None, payload = "", param = None, is_query_param = False):
+def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False):
     
     enviroment, endpoint, setup = get_enviroment(endpoint_code)
     
@@ -118,7 +118,7 @@ def send_request_status(endpoint_code, id = None, payload = "", param = None, is
     
         type_param = "?" if is_query_param else "/"
     
-    url += f"{type_param}{param}"    
+    url += f"{type_param}{param or ''}"    
     
     headers = get_headers(token)
 

@@ -10,7 +10,7 @@ def handler(url, payload, headers, method = "POST"):
         
         response = requests.request(method, url, headers=headers, data = data)
         
-        set_logg_error(data, method, url, headers, response)
+        #set_logg_error(data, method, url, headers, response)
         
         return json.loads(response.text), response.status_code
         
