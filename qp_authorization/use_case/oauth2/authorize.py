@@ -3,9 +3,10 @@ import frappe
 import requests
 import json
 from datetime import datetime, timedelta
+from frappe.utils import now_datetime
 
 @frappe.whitelist()
-def request_code():
+def request_code(enviroment=None):
 
     frappe.cache().set("access_token", "empty")
 
@@ -17,7 +18,9 @@ def request_code():
     
     redirect_uri = credentials[0].callback_url
 
-    auth_url = "{url}&response_type=code&client_id={client_id}&redirect_uri={redirect_uri}".format(url =url, client_id=client_id, redirect_uri=redirect_uri)
+    state_param = "&state={}".format(enviroment) if enviroment else ""
+
+    auth_url = "{url}&response_type=code&client_id={client_id}&redirect_uri={redirect_uri}{state_param}".format(url =url, client_id=client_id, redirect_uri=redirect_uri, state_param=state_param)
     
     webbrowser.open(auth_url)
 
@@ -53,16 +56,21 @@ def get_access_token():
 
         request_code()
 
-    create_session(response_json)
+    enviroment = query_params.get("state")
+
+    create_session(response_json, enviroment)
 
     return response_json["access_token"]
 
-def create_session(response_json):
+def create_session(response_json, enviroment=None):
 
     session = frappe.get_doc( doctype = "qp_auth_session", **response_json)
 
-    session.expire_date = datetime.now() + timedelta(seconds=int(response_json["expires_in"]))
+    session.expire_date = now_datetime() + timedelta(seconds=int(response_json["expires_in"]))
     
+    if enviroment:
+        session.enviroment = enviroment
+
     session.insert()
 
     frappe.db.commit()
@@ -99,7 +107,7 @@ def get_refresh_token(session):
         
         request_code()
 
-    create_session(response_json)
+    create_session(response_json, session.enviroment)
 
     return response_json["access_token"]
 
@@ -107,7 +115,7 @@ def get_token(enviroment):
 
     session = frappe.get_last_doc('qp_auth_session', filters = {"enviroment": enviroment})
         
-    if session.expire_date > datetime.now():
+    if session.expire_date > now_datetime():
 
         return session.access_token
 
@@ -119,7 +127,7 @@ def callback():
 
         session = frappe.get_last_doc('qp_auth_session')
         
-        if session.expire_date > datetime.now():
+        if session.expire_date > now_datetime():
 
             return session.access_token
 

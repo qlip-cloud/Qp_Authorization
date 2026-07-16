@@ -1,5 +1,6 @@
 import frappe
 from datetime import datetime
+from frappe.utils import now_datetime
 from qp_authorization.constant.endpoint import AUTH
 from qp_authorization.use_case.rest.request import handler as send_request_base
 import jwt
@@ -21,7 +22,13 @@ def get_token(enviroment, setup_code):
     return session.access_token
 
 def get_session(enviroment_code):
-        
+    
+    session_cache = get_cache_session(enviroment_code)  
+
+    if session_cache:
+
+        return session_cache
+     
     return get_doc_session(enviroment_code)
     
 def get_doc_session(enviroment_code):
@@ -55,6 +62,8 @@ def get_cache_session(enviroment_code):
         if session and session.is_valid():
 
             return session
+
+        cache.delete(f"session-{current_site}-{enviroment_code}")
 
 def search_token(enviroment, endpoint):
     
@@ -201,7 +210,9 @@ def get_expire_date(token):
     
     expiration_time = decoded_token.get('exp')
 
-    return datetime.fromtimestamp(expiration_time)
+    expire_system = datetime.fromtimestamp(expiration_time)
+
+    return expire_system + (now_datetime() - datetime.now())
 
 def get_enviroment(endpoint_code, setup_list_code = None):
 
