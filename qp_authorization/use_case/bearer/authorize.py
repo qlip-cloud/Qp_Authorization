@@ -104,13 +104,13 @@ def get_headers(token = None):
 
     return headers
 
-def send_request(endpoint_code, id = None, payload = "", param = None):
+def send_request(endpoint_code, id = "", payload = "", param = ""):
     
     response, status = send_request_status(endpoint_code, id, payload, param)
 
     return response
 
-def send_request_status(endpoint_code, id = None, payload = "", param = None, is_query_param = False):
+def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False):
     
     token = get_token()
 
