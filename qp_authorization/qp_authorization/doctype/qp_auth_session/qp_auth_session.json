@@ -74,15 +74,16 @@
    "fieldtype": "Datetime",
    "label": "expire_date"
   },
-  {
-   "fieldname": "enviroment",
-   "fieldtype": "Data",
-   "label": "enviroment"
-  }
+   {
+    "fieldname": "enviroment",
+    "fieldtype": "Data",
+    "label": "enviroment",
+    "search_index": 1
+   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-16 08:43:03.985234",
+ "modified": "2026-08-07 21:45:00.000000",
  "modified_by": "Administrator",
  "module": "Qp Authorization",
  "name": "qp_auth_session",

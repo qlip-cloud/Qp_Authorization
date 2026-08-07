@@ -1,10 +1,11 @@
 import frappe
 from datetime import datetime
+from frappe.utils import now_datetime
 from qp_authorization.constant.endpoint import AUTH
 from qp_authorization.use_case.rest.request import handler as send_request_base
 import jwt
 import json
-from qp_authorization.service.utils import get_endpoint, get_cache_enviroment
+from qp_authorization.service.utils import get_endpoint
 
 def get_token(enviroment, setup_code):
     
@@ -27,7 +28,7 @@ def get_session(enviroment_code):
     if session_cache:
 
         return session_cache
-    
+     
     return get_doc_session(enviroment_code)
     
 def get_doc_session(enviroment_code):
@@ -61,6 +62,8 @@ def get_cache_session(enviroment_code):
         if session and session.is_valid():
 
             return session
+
+        cache.delete(f"session-{current_site}-{enviroment_code}")
 
 def search_token(enviroment, endpoint):
     
@@ -104,7 +107,7 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     return response
 
-def send_request_status(endpoint_code, id = None, payload = "", param = None, is_query_param = False):
+def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False):
     
     enviroment, endpoint, setup = get_enviroment(endpoint_code)
     
@@ -118,7 +121,7 @@ def send_request_status(endpoint_code, id = None, payload = "", param = None, is
     
         type_param = "?" if is_query_param else "/"
     
-    url += f"{type_param}{param}"    
+    url += f"{type_param}{param or ''}"    
     
     headers = get_headers(token)
 
@@ -207,7 +210,9 @@ def get_expire_date(token):
     
     expiration_time = decoded_token.get('exp')
 
-    return datetime.fromtimestamp(expiration_time)
+    expire_system = datetime.fromtimestamp(expiration_time)
+
+    return expire_system + (now_datetime() - datetime.now())
 
 def get_enviroment(endpoint_code, setup_list_code = None):
 
