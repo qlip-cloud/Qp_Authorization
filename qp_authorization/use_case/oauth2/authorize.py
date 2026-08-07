@@ -64,12 +64,17 @@ def get_access_token():
 
 def create_session(response_json, enviroment=None):
 
+    if not enviroment:
+
+        frappe.log_error(message="create_session sin environment, no se inserta sesion", title="qp_authorization: create_session sin environment")
+
+        return
+
     session = frappe.get_doc( doctype = "qp_auth_session", **response_json)
 
     session.expire_date = now_datetime() + timedelta(seconds=int(response_json["expires_in"]))
-    
-    if enviroment:
-        session.enviroment = enviroment
+
+    session.enviroment = enviroment
 
     session.insert()
 
