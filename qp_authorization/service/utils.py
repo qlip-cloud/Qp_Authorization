@@ -27,7 +27,9 @@ def get_cache_enviroment():
     current_site = frappe.local.site
 
     cache.set(f"enviroment-{current_site}", "")
+    
     enviroment_url = cache.get(f"enviroment-{current_site}")
+    
     if not enviroment_url:
 
         enviroment = get_enviroment()

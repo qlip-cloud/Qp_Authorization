@@ -9,7 +9,9 @@
   "title",
   "user",
   "password",
-  "url"
+  "url",
+  "username_key",
+  "password_key"
  ],
  "fields": [
   {
@@ -32,11 +34,21 @@
    "fieldname": "url",
    "fieldtype": "Data",
    "label": "URL"
+  },
+  {
+   "fieldname": "username_key",
+   "fieldtype": "Data",
+   "label": "username_key"
+  },
+  {
+   "fieldname": "password_key",
+   "fieldtype": "Data",
+   "label": "password_key"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-18 17:18:17.538047",
+ "modified": "2026-04-09 11:25:02.392672",
  "modified_by": "Administrator",
  "module": "Qp Authorization",
  "name": "qp_auth_Enviroment",
