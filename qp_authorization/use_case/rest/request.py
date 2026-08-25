@@ -29,7 +29,15 @@ def handler(url, payload, headers, method = "POST"):
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
             "errorInterno": str(e)
         }, 500
-    
+        
+    except json.JSONDecodeError as e:
+        
+        frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
+
+        return {
+            "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
+            "errorInterno": str(e.doc)
+        }, 500
     except Exception as e:
         
         frappe.log_error(message=str(e), title= f"Error al procesar peticion {url}")
