@@ -2,13 +2,13 @@ import requests
 import json
 import pickle
 import frappe
-def handler(url, payload, headers, method = "POST"):
+def handler(url, payload, headers, method = "POST", timeout = None):
 
     data= json.dumps(payload)
 
     try:
         
-        response = requests.request(method, url, headers=headers, data = data)
+        response = requests.request(method, url, headers=headers, data = data, timeout = timeout)
         
         set_logg_error(data, method, url, headers, response)
         
@@ -18,7 +18,7 @@ def handler(url, payload, headers, method = "POST"):
         
         title = ("Error al procesar peticion " + url)[:140]
         frappe.log_error(message=str(e), title=title)
-
+        
         return {
             "Message": "Lo sentimos, ha habido un error en la transmisión de datos.",
             "errorInterno": "timeout en peticion"

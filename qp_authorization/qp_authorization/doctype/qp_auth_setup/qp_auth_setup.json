@@ -5,16 +5,17 @@
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
- "field_order": [
-  "enviroment",
-  "scenviroment",
-  "enviroment_title",
-  "ssenviroment",
-  "autenticacion",
-  "acautonticacion",
-  "autenticacion_title",
-  "code"
- ],
+"field_order": [
+   "enviroment",
+   "scenviroment",
+   "enviroment_title",
+   "ssenviroment",
+   "autenticacion",
+   "acautonticacion",
+   "autenticacion_title",
+   "token_valid_minutes",
+   "code"
+  ],
  "fields": [
   {
    "fieldname": "enviroment",
@@ -51,6 +52,12 @@
    "fieldname": "autenticacion_title",
    "fieldtype": "Read Only",
    "label": "Autenticacion title"
+  },
+  {
+   "default": "30",
+   "fieldname": "token_valid_minutes",
+   "fieldtype": "Int",
+   "label": "Validez token (min) si no expira"
   },
   {
    "fieldname": "code",
