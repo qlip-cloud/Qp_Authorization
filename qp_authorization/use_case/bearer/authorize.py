@@ -1,5 +1,5 @@
 import frappe
-from datetime import datetime
+from datetime import datetime, timedelta
 from frappe.utils import now_datetime
 from qp_authorization.constant.endpoint import AUTH
 from qp_authorization.use_case.rest.request import handler as send_request_base
@@ -7,11 +7,21 @@ import jwt
 import json
 from qp_authorization.service.utils import get_endpoint
 
+_memory_sessions = {}
+
 def get_token(enviroment, setup_code):
+    
+    session = get_memory_session(enviroment.name)
+    
+    if session:
+
+        return session.access_token
     
     session = get_session(enviroment.name)
     
     if session:
+        
+        save_memory_session(session, enviroment.name)
 
         return session.access_token
     
@@ -19,7 +29,33 @@ def get_token(enviroment, setup_code):
 
     session = create_session(enviroment, endpoint)
     
+    save_memory_session(session, enviroment.name)
+    
     return session.access_token
+
+def get_memory_session(enviroment_code):
+    
+    memory_key = get_memory_key(enviroment_code)
+    
+    session = _memory_sessions.get(memory_key)
+    
+    if session and session.is_valid():
+        
+        return session
+    
+    if session:
+        
+        _memory_sessions.pop(memory_key, None)
+    
+    return None
+
+def save_memory_session(session, enviroment_code):
+    
+    _memory_sessions[get_memory_key(enviroment_code)] = session
+
+def get_memory_key(enviroment_code):
+    
+    return "{}-{}".format(frappe.local.site, enviroment_code)
 
 def get_session(enviroment_code):
     
@@ -107,7 +143,7 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     return response
 
-def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False):
+def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False, timeout = None):
     
     enviroment, endpoint, setup = get_enviroment(endpoint_code)
     
@@ -125,7 +161,7 @@ def send_request_status(endpoint_code, id = "", payload = "", param = "", is_que
     
     headers = get_headers(token)
 
-    response, status =  send_request_base(url, payload, headers, method = endpoint.method)
+    response, status =  send_request_base(url, payload, headers, method = endpoint.method, timeout = timeout)
 
     return response, status
 
@@ -135,7 +171,7 @@ def send_request_with_param(endpoint_code, id = None, payload = ""):
     
     return response
     
-def send_request_status_with_param(endpoint_code, id = None, payload = ""):
+def send_request_status_with_param(endpoint_code, id = None, payload = "", timeout = None):
     
     enviroment, endpoint, setup = get_enviroment(endpoint_code)
     
@@ -145,7 +181,7 @@ def send_request_status_with_param(endpoint_code, id = None, payload = ""):
 
     headers = get_headers(token)
 
-    response, status =  send_request_base(url, payload, headers, method = endpoint.method)
+    response, status =  send_request_base(url, payload, headers, method = endpoint.method, timeout = timeout)
 
     return response, status
 
@@ -171,7 +207,7 @@ def create_session(enviroment, endpoint):
 
     token = search_token(enviroment, endpoint)
 
-    expire_date = get_expire_date(token)
+    expire_date = get_expire_date(token, endpoint.setup)
 
     session = save_session(token, expire_date, enviroment.name)
 
@@ -204,15 +240,37 @@ def save_session(token, expire_date, enviroment_code):
 
     return session
 
-def get_expire_date(token):
+def get_expire_date(token, setup_code):
 
-    decoded_token = jwt.decode(token, verify=False)
+    try:
+        
+        decoded_token = jwt.decode(token, verify=False)
+        
+        expiration_time = decoded_token.get('exp')
+        
+        if expiration_time:
+            
+            expire_system = datetime.fromtimestamp(expiration_time) - timedelta(seconds = 60)
+            
+            return expire_system + (now_datetime() - datetime.now())
+        
+    except Exception:
+        
+        pass
     
-    expiration_time = decoded_token.get('exp')
+    return now_datetime() + timedelta(seconds = get_token_valid_seconds(setup_code))
 
-    expire_system = datetime.fromtimestamp(expiration_time)
-
-    return expire_system + (now_datetime() - datetime.now())
+def get_token_valid_seconds(setup_code):
+    
+    try:
+        
+        value = frappe.db.get_value("qp_auth_Setup", setup_code, "token_valid_minutes")
+        
+        return int(value or 30) * 60
+        
+    except Exception:
+        
+        return 1800
 
 def get_enviroment(endpoint_code, setup_list_code = None):
 
