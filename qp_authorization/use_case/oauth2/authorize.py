@@ -5,6 +5,17 @@ import json
 from datetime import datetime, timedelta
 from frappe.utils import now_datetime
 
+CLIENT_CREDENTIALS_GRANT = "Client Credentials"
+DEFAULT_SCOPE = "https://api.businesscentral.dynamics.com/.default"
+DEFAULT_RESOURCE = "https://api.businesscentral.dynamics.com"
+DEFAULT_TIMEOUT = 30
+CACHE_KEY_TEMPLATE = "qp_authorization:client_credentials:{}:{}"
+
+
+class ClientCredentialsError(Exception):
+    pass
+
+
 @frappe.whitelist()
 def request_code(enviroment=None):
 
@@ -116,7 +127,15 @@ def get_refresh_token(session):
 
     return response_json["access_token"]
 
-def get_token(enviroment):
+def get_token(enviroment, credentials_name=None):
+
+    if credentials_name:
+
+        credentials = frappe.get_doc("qp_auth_credentials", credentials_name)
+
+        if credentials.grant_type == CLIENT_CREDENTIALS_GRANT:
+
+            return get_client_credentials_token(credentials, enviroment)
 
     session = frappe.get_last_doc('qp_auth_session', filters = {"enviroment": enviroment})
         
@@ -149,3 +168,133 @@ def callback():
         request_code()
 
         return False
+
+
+def get_client_credentials_token(credentials, environment_code):
+
+    credentials_name = (
+        credentials if isinstance(credentials, str) else credentials.name
+    )
+
+    cache_key = CACHE_KEY_TEMPLATE.format(environment_code, credentials_name)
+
+    cached_token = frappe.cache().get_value(cache_key, expires=True)
+
+    if cached_token:
+
+        return cached_token
+
+    if isinstance(credentials, str):
+
+        credentials = frappe.get_doc("qp_auth_credentials", credentials)
+
+    if credentials.grant_type != CLIENT_CREDENTIALS_GRANT:
+
+        raise ClientCredentialsError(
+            "La credencial {} no es de tipo {}".format(
+                credentials.name,
+                CLIENT_CREDENTIALS_GRANT,
+            )
+        )
+
+    access_token, expires_in = request_client_credentials_token(credentials)
+
+    ttl = max(int(expires_in) - 60, 60)
+
+    frappe.cache().set_value(cache_key, access_token, expires_in_sec=ttl)
+
+    return access_token
+
+
+def request_client_credentials_token(credentials):
+
+    token_url = (
+        credentials.get("access_token_url")
+        or credentials.get("auth_url")
+        or ""
+    ).strip()
+    client_id = (credentials.get("client_id") or "").strip()
+    client_secret = credentials.get("client_secret") or ""
+
+    if not token_url:
+
+        raise ClientCredentialsError(
+            "La credencial no tiene access_token_url ni auth_url"
+        )
+
+    if not client_id:
+
+        raise ClientCredentialsError("La credencial no tiene client_id")
+
+    if not client_secret:
+
+        raise ClientCredentialsError("La credencial no tiene client_secret")
+
+    payload = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret,
+    }
+
+    payload.update(get_token_resource_params(credentials, token_url))
+
+    try:
+
+        response = requests.post(
+            token_url,
+            data=payload,
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            timeout=DEFAULT_TIMEOUT,
+        )
+
+    except requests.RequestException as error:
+
+        raise ClientCredentialsError(
+            "Error de red obteniendo token: {}".format(error)
+        )
+
+    if response.status_code != 200:
+
+        raise ClientCredentialsError(
+            "Error obteniendo token Client Credentials ({}): {}".format(
+                response.status_code,
+                (response.text or "")[:500],
+            )
+        )
+
+    try:
+
+        response_json = response.json()
+
+    except ValueError:
+
+        raise ClientCredentialsError(
+            "La respuesta del token no es JSON"
+        )
+
+    access_token = response_json.get("access_token")
+
+    if not access_token:
+
+        raise ClientCredentialsError(
+            "La respuesta del token no incluye access_token"
+        )
+
+    return access_token, response_json.get("expires_in") or 3600
+
+
+def get_token_resource_params(credentials, token_url):
+
+    configured = (credentials.get("scope") or "").strip()
+
+    if "oauth2/v2.0/token" in token_url:
+
+        return {"scope": configured or DEFAULT_SCOPE}
+
+    if "oauth2/token" in token_url:
+
+        return {"resource": configured or DEFAULT_RESOURCE}
+
+    return {"scope": configured or DEFAULT_SCOPE}
