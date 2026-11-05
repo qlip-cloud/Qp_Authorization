@@ -11,6 +11,10 @@ def handler(url, payload, headers, method = "POST", timeout = None):
         response = requests.request(method, url, headers=headers, data = data, timeout = timeout)
         
         set_logg_error(data, method, url, headers, response)
+
+        if not response.text:
+            
+            return {}, response.status_code
         
         return json.loads(response.text), response.status_code
         
