@@ -29,10 +29,11 @@ def execute():
 
 
 def clear_session_cache():
-    """Drop legacy plaintext session payloads from the custom Redis cache."""
+    """Drop legacy plaintext token payloads from the custom Redis cache."""
 
     try:
         frappe.cache().delete_keys("session-*")
+        frappe.cache().delete_keys("qp_authorization:client_credentials:*")
     except Exception:
         pass
 

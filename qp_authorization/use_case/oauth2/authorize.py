@@ -21,6 +21,28 @@ class ClientCredentialsError(Exception):
     pass
 
 
+def encrypt_cached_token(token):
+    """Encrypt a client-credentials token before writing it to the cache."""
+
+    from frappe.utils.password import encrypt
+
+    return encrypt(token)
+
+
+def decrypt_cached_token(value):
+    """Return a cached token or None for legacy plaintext/corrupt values."""
+
+    try:
+
+        from frappe.utils.password import decrypt
+
+        return decrypt(value)
+
+    except Exception:
+
+        return None
+
+
 def get_authorization_code_credentials():
     """Load the configured Authorization Code credential document.
 
@@ -216,7 +238,13 @@ def get_client_credentials_token(credentials, environment_code):
 
     if cached_token:
 
-        return cached_token
+        token = decrypt_cached_token(cached_token)
+
+        if token:
+
+            return token
+
+        frappe.cache().delete_value(cache_key)
 
     if isinstance(credentials, str):
 
@@ -235,7 +263,9 @@ def get_client_credentials_token(credentials, environment_code):
 
     ttl = max(int(expires_in) - 60, 60)
 
-    frappe.cache().set_value(cache_key, access_token, expires_in_sec=ttl)
+    frappe.cache().set_value(
+        cache_key, encrypt_cached_token(access_token), expires_in_sec=ttl
+    )
 
     return access_token
 
