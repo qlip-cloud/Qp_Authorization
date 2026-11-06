@@ -270,7 +270,9 @@ def save_session(token, expire_date, enviroment_code):
     }
 
     session = frappe.get_doc(doctype = "qp_auth_session", **session_json)
-    
+
+    session.flags.ignore_permissions = True
+
     session.save()
 
     frappe.db.commit()

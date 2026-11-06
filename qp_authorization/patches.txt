@@ -2,3 +2,4 @@ qp_authorization.patches.add_index_auth_session_enviroment
 qp_authorization.patches.cleanup_auth_session
 qp_authorization.patches.migrate_single_setup
 qp_authorization.patches.migrate_auth_secrets
+qp_authorization.patches.restrict_auth_doctypes

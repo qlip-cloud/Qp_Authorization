@@ -140,7 +140,7 @@ def create_session(response_json, enviroment=None):
 
     session.enviroment = enviroment
 
-    session.insert()
+    session.insert(ignore_permissions=True)
 
     frappe.db.commit()
 
@@ -203,7 +203,7 @@ def get_token(enviroment, credentials_name=None):
 
 def callback():
 
-    if frappe.get_list('qp_auth_session'):
+    if frappe.get_all('qp_auth_session'):
 
         session = frappe.get_last_doc('qp_auth_session')
         
