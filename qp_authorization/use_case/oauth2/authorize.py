@@ -4,6 +4,11 @@ import requests
 import json
 from datetime import datetime, timedelta
 from frappe.utils import now_datetime
+from qp_authorization.service.secrets import get_secret
+from qp_authorization.use_case.rest.safe_logging import (
+    describe_http_error,
+    summarize_error_response,
+)
 
 CLIENT_CREDENTIALS_GRANT = "Client Credentials"
 DEFAULT_SCOPE = "https://api.businesscentral.dynamics.com/.default"
@@ -16,18 +21,41 @@ class ClientCredentialsError(Exception):
     pass
 
 
+def get_authorization_code_credentials():
+    """Load the configured Authorization Code credential document.
+
+    Reading ``client_secret`` from a list query returns the Password dummy
+    value, so callers must always use the document and ``get_secret``.
+    """
+
+    rows = frappe.get_all(
+        "qp_auth_credentials",
+        filters={"grant_type": "Authorization Code"},
+        fields=["name"],
+        limit=1,
+        order_by="modified desc",
+        ignore_permissions=True,
+    )
+
+    if not rows:
+
+        frappe.throw("No hay credenciales de tipo Authorization Code")
+
+    return frappe.get_doc("qp_auth_credentials", rows[0].name)
+
+
 @frappe.whitelist()
 def request_code(enviroment=None):
 
     frappe.cache().set("access_token", "empty")
 
-    credentials = frappe.db.get_list('qp_auth_credentials', filters = {"grant_type":  "Authorization Code"}, fields = ["auth_url", "client_id", "callback_url"])
+    credentials = get_authorization_code_credentials()
 
-    url = credentials[0].auth_url
+    url = credentials.auth_url
     
-    client_id = credentials[0].client_id
+    client_id = credentials.client_id
     
-    redirect_uri = credentials[0].callback_url
+    redirect_uri = credentials.callback_url
 
     state_param = "&state={}".format(enviroment) if enviroment else ""
 
@@ -40,16 +68,16 @@ def get_access_token():
 
     query_params = frappe.request.args
 
-    credentials = frappe.db.get_list('qp_auth_credentials', filters = {"grant_type":  "Authorization Code"}, fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
+    credentials = get_authorization_code_credentials()
 
-    url = credentials[0].access_token_url
+    url = credentials.access_token_url
 
     payload = {
-        "client_id": credentials[0].client_id,
+        "client_id": credentials.client_id,
         "code": query_params.get("code"),
-        "redirect_uri": credentials[0].callback_url,
+        "redirect_uri": credentials.callback_url,
         "grant_type": "authorization_code",
-        "client_secret": credentials[0].client_secret,
+        "client_secret": get_secret(credentials, "client_secret"),
         "resource": "https://api.businesscentral.dynamics.com"
     }
 
@@ -63,7 +91,10 @@ def get_access_token():
 
     if "error" in response_json:
         
-        frappe.log_error(response_json, "Error en peticion de BC")
+        frappe.log_error(
+            message=summarize_error_response(response_json),
+            title="Error en peticion de BC",
+        )
 
         request_code()
 
@@ -95,16 +126,16 @@ def create_session(response_json, enviroment=None):
 
 def get_refresh_token(session):
 
-    credentials = frappe.db.get_list('qp_auth_credentials', filters = {"grant_type":  "Authorization Code"}, fields = ["access_token_url", "client_id", "callback_url", "client_secret"])
+    credentials = get_authorization_code_credentials()
 
-    url = credentials[0].access_token_url
+    url = credentials.access_token_url
 
     payload = {
-        "client_id": credentials[0].client_id,
-        "refresh_token": session.refresh_token,
-        "redirect_uri": credentials[0].callback_url,
+        "client_id": credentials.client_id,
+        "refresh_token": get_secret(session, "refresh_token"),
+        "redirect_uri": credentials.callback_url,
         "grant_type": "refresh_token",
-        "client_secret": credentials[0].client_secret,
+        "client_secret": get_secret(credentials, "client_secret"),
         "resource": "https://api.businesscentral.dynamics.com"
     }
 
@@ -119,7 +150,10 @@ def get_refresh_token(session):
 
     if "error" in response_json:
         
-        frappe.log_error(response_json, "Error en peticion de BC")
+        frappe.log_error(
+            message=summarize_error_response(response_json),
+            title="Error en peticion de BC",
+        )
         
         request_code()
 
@@ -141,7 +175,7 @@ def get_token(enviroment, credentials_name=None):
         
     if session.expire_date > now_datetime():
 
-        return session.access_token
+        return get_secret(session, "access_token")
 
     return get_refresh_token(session)
 
@@ -153,7 +187,7 @@ def callback():
         
         if session.expire_date > now_datetime():
 
-            return session.access_token
+            return get_secret(session, "access_token")
 
         return get_refresh_token(session)
     
@@ -214,7 +248,7 @@ def request_client_credentials_token(credentials):
         or ""
     ).strip()
     client_id = (credentials.get("client_id") or "").strip()
-    client_secret = credentials.get("client_secret") or ""
+    client_secret = get_secret(credentials, "client_secret")
 
     if not token_url:
 
@@ -258,9 +292,8 @@ def request_client_credentials_token(credentials):
     if response.status_code != 200:
 
         raise ClientCredentialsError(
-            "Error obteniendo token Client Credentials ({}): {}".format(
-                response.status_code,
-                (response.text or "")[:500],
+            "Error obteniendo token Client Credentials: {}".format(
+                describe_http_error(response)
             )
         )
 

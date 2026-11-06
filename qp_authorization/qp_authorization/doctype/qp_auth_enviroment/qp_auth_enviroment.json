@@ -27,7 +27,7 @@
   },
   {
    "fieldname": "password",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "Password"
   },
   {
@@ -48,7 +48,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-09 11:25:02.392672",
+ "modified": "2026-11-06 14:18:00.000000",
  "modified_by": "Administrator",
  "module": "Qp Authorization",
  "name": "qp_auth_Enviroment",

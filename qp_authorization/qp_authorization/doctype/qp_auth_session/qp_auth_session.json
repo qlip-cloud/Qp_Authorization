@@ -56,17 +56,17 @@
   },
   {
    "fieldname": "access_token",
-   "fieldtype": "Long Text",
+   "fieldtype": "Password",
    "label": "access_token"
   },
   {
    "fieldname": "refresh_token",
-   "fieldtype": "Long Text",
+   "fieldtype": "Password",
    "label": "refresh_token"
   },
   {
    "fieldname": "code",
-   "fieldtype": "Long Text",
+   "fieldtype": "Password",
    "label": "code"
   },
   {
@@ -83,7 +83,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-07 21:45:00.000000",
+ "modified": "2026-11-06 14:18:00.000000",
  "modified_by": "Administrator",
  "module": "Qp Authorization",
  "name": "qp_auth_session",

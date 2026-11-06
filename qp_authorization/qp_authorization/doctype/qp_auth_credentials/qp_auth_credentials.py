@@ -5,4 +5,11 @@
 from frappe.model.document import Document
 
 class qp_auth_credentials(Document):
-	pass
+
+	def on_trash(self):
+
+		from frappe.utils.password import remove_encrypted_password
+
+		for fieldname in ("client_secret", "password"):
+
+			remove_encrypted_password(self.doctype, self.name, fieldname)

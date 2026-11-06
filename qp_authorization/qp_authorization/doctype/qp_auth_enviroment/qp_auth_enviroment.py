@@ -6,6 +6,12 @@ from frappe.model.document import Document
 from qp_authorization.use_case.bearer.authorize import search_token
 
 class qp_auth_Enviroment(Document):
+
+	def on_trash(self):
+
+		from frappe.utils.password import remove_encrypted_password
+
+		remove_encrypted_password(self.doctype, self.name, "password")
 	
 	def validate(self):
 		pass
