@@ -9,7 +9,13 @@ from qp_authorization.use_case.rest.safe_logging import (
 )
 
 
-def handler(url, payload, headers, method="POST", timeout=None):
+def _is_ignored(status_code, ignore_statuses):
+    """Status esperados que no deben registrarse como error (p. ej. 404 de una
+    ventana de sincronizacion sin datos)."""
+    return bool(ignore_statuses) and status_code in ignore_statuses
+
+
+def handler(url, payload, headers, method="POST", timeout=None, ignore_statuses=None):
 
     data = json.dumps(payload)
 
@@ -19,7 +25,9 @@ def handler(url, payload, headers, method="POST", timeout=None):
             method, url, headers=headers, data=data, timeout=timeout
         )
 
-        if response.status_code >= 400:
+        if response.status_code >= 400 and not _is_ignored(
+            response.status_code, ignore_statuses
+        ):
 
             log_request_failure(
                 url, method, payload, headers, response=response

@@ -180,7 +180,7 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     return response
 
-def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False, timeout = None):
+def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False, timeout = None, ignore_statuses = None):
     
     enviroment, endpoint, setup = get_enviroment(endpoint_code)
     
@@ -198,7 +198,7 @@ def send_request_status(endpoint_code, id = "", payload = "", param = "", is_que
     
     headers = get_headers(token)
 
-    response, status =  send_request_base(url, payload, headers, method = endpoint.method, timeout = timeout)
+    response, status =  send_request_base(url, payload, headers, method = endpoint.method, timeout = timeout, ignore_statuses = ignore_statuses)
 
     return response, status
 
