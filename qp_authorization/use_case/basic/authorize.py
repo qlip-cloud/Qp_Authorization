@@ -1,11 +1,14 @@
 import frappe
 import base64
+from qp_authorization.service.secrets import get_secret
 from qp_authorization.use_case.bearer.authorize import get_enviroment
 from qp_authorization.use_case.rest.request import handler as send_request_base
 
 def get_headers(enviroment):
 
-    credentials = f"{enviroment.user}:{enviroment.password}"
+    password = get_secret(enviroment, "password")
+
+    credentials = "{0}:{1}".format(enviroment.user, password)
 
     encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
 
