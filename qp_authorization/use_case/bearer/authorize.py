@@ -5,6 +5,7 @@ from qp_authorization.constant.endpoint import AUTH
 from qp_authorization.use_case.rest.request import handler as send_request_base
 import jwt
 import json
+from qp_authorization.service.secrets import get_secret
 from qp_authorization.service.utils import get_endpoint
 
 _memory_sessions = {}
@@ -15,15 +16,27 @@ def get_token(enviroment, setup_code):
     
     if session:
 
-        return session.access_token
+        token = get_secret(session, "access_token")
+
+        if token:
+
+            return token
+
+        clear_session_cache(enviroment.name)
     
     session = get_session(enviroment.name)
     
     if session:
         
-        save_memory_session(session, enviroment.name)
+        token = get_secret(session, "access_token")
 
-        return session.access_token
+        if token:
+
+            save_memory_session(session, enviroment.name)
+
+            return token
+
+        clear_session_cache(enviroment.name)
     
     endpoint = get_endpoint(AUTH, setup_code)
 
@@ -31,7 +44,7 @@ def get_token(enviroment, setup_code):
     
     save_memory_session(session, enviroment.name)
     
-    return session.access_token
+    return get_secret(session, "access_token")
 
 def get_memory_session(enviroment_code):
     
@@ -52,6 +65,24 @@ def get_memory_session(enviroment_code):
 def save_memory_session(session, enviroment_code):
     
     _memory_sessions[get_memory_key(enviroment_code)] = session
+
+def clear_session_cache(enviroment_code):
+
+    _memory_sessions.pop(get_memory_key(enviroment_code), None)
+
+    if not enviroment_code:
+
+        return
+
+    try:
+
+        frappe.cache().delete(
+            "session-{0}-{1}".format(frappe.local.site, enviroment_code)
+        )
+
+    except Exception:
+
+        pass
 
 def get_memory_key(enviroment_code):
     
@@ -112,7 +143,7 @@ def search_token(enviroment, endpoint):
 
     payload = {
         username_key: enviroment.user,
-        password_key: enviroment.password
+        password_key: get_secret(enviroment, "password")
     }
 
     response, status_code = send_request_base(url, payload, headers, method = endpoint.method)
@@ -120,8 +151,14 @@ def search_token(enviroment, endpoint):
     assert_authentication_ok(status_code)
     
     response_lower = {k.lower(): v for k, v in response.items()}
-    
-    return response_lower.get("token")
+
+    token = response_lower.get("token")
+
+    if not token:
+
+        raise AuthenticationFail("La respuesta de autenticacion no incluye token")
+
+    return token
 
 def get_headers(token = None):
 
@@ -143,7 +180,7 @@ def send_request(endpoint_code, id = None, payload = "", param = None):
 
     return response
 
-def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False, timeout = None):
+def send_request_status(endpoint_code, id = "", payload = "", param = "", is_query_param = False, timeout = None, ignore_statuses = None):
     
     enviroment, endpoint, setup = get_enviroment(endpoint_code)
     
@@ -161,7 +198,7 @@ def send_request_status(endpoint_code, id = "", payload = "", param = "", is_que
     
     headers = get_headers(token)
 
-    response, status =  send_request_base(url, payload, headers, method = endpoint.method, timeout = timeout)
+    response, status =  send_request_base(url, payload, headers, method = endpoint.method, timeout = timeout, ignore_statuses = ignore_statuses)
 
     return response, status
 
@@ -233,7 +270,9 @@ def save_session(token, expire_date, enviroment_code):
     }
 
     session = frappe.get_doc(doctype = "qp_auth_session", **session_json)
-    
+
+    session.flags.ignore_permissions = True
+
     session.save()
 
     frappe.db.commit()
